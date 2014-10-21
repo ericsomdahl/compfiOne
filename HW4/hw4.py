@@ -9,10 +9,12 @@ import datetime as dt
 import QSTK.qstkutil.DataAccess as da
 import QSTK.qstkutil.tsutil as tsu
 import QSTK.qstkstudy.EventProfiler as ep
+import os
 
 orders_csv = None
 f = None
 dataObj = da.DataAccess('Yahoo')
+print "Scratch Directory: ", dataObj.scratchdir
 
 
 def find_events(ls_symbols, d_data):
@@ -37,7 +39,7 @@ def find_events(ls_symbols, d_data):
             # Event is found if on 2 consecutive closes the price went from
             # greater than or equal to 5.00 to less than 5.00
             if f_symprice_yest >= 5.0 and f_symprice_today < 5.0:
-                write_order(sym, ldt_timestamps[i])
+                write_order(s_sym, ldt_timestamps[i])
                 #df_events[s_sym].ix[ldt_timestamps[i]] = 1
 
     return df_events
@@ -50,15 +52,15 @@ def write_order(symbol, tstamp):
     if f is None:
         f = open('{0:s}/{1:s}'.format(os.path.dirname(os.path.realpath(__file__)), orders_csv), 'w')
 
-    f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, BUY, 100'.format(tstamp.year, tstamp.month, tstamp.day))
+    f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, BUY, 100'.format(tstamp.year, tstamp.month, tstamp.day, symbol))
     five_days_later = dt.timedelta(days=5)
     close_tstamp = tstamp + five_days_later
     f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, SELL, 100'
-            .format(close_tstamp.year, close_tstamp.month, close_tstamp.day))
+            .format(close_tstamp.year, close_tstamp.month, close_tstamp.day, symbol))
     pass
 
 
-def create_study(ls_symbols, ldt_timestamps, s_study_name, orders_csv):
+def create_study(ls_symbols, ldt_timestamps, s_study_name):
     global dataObj, f
 
     print "Grabbing data to perform {0}".format(s_study_name)
@@ -74,7 +76,8 @@ def create_study(ls_symbols, ldt_timestamps, s_study_name, orders_csv):
         d_data[s_key] = d_data[s_key].fillna(1.0)
 
     df_events = find_events(ls_symbols, d_data)
-    f.close()
+    if f is not None:
+        f.close()
 
     #print "Creating Study"
     #ep.eventprofiler(df_events, d_data, i_lookback=20, i_lookforward=20,
@@ -90,9 +93,10 @@ def main():
     global dataObj
 
     ls_symbols_2012 = dataObj.get_symbols_from_list('sp5002012')
-    ls_symbols_2012.append('SPY')
+    #ls_symbols_2012.append('SPY')
 
     create_study(ls_symbols_2012, ldt_timestamps, '2012Study2.pdf')
+    print "Finished"
 
 if __name__ == '__main__':
     import argparse
