@@ -10,6 +10,8 @@ import QSTK.qstkutil.DataAccess as da
 import QSTK.qstkutil.tsutil as tsu
 import QSTK.qstkstudy.EventProfiler as ep
 
+orders_csv = None
+f = None
 dataObj = da.DataAccess('Yahoo')
 
 
@@ -35,13 +37,29 @@ def find_events(ls_symbols, d_data):
             # Event is found if on 2 consecutive closes the price went from
             # greater than or equal to 5.00 to less than 5.00
             if f_symprice_yest >= 5.0 and f_symprice_today < 5.0:
-                df_events[s_sym].ix[ldt_timestamps[i]] = 1
+                write_order(sym, ldt_timestamps[i])
+                #df_events[s_sym].ix[ldt_timestamps[i]] = 1
 
     return df_events
 
 
-def create_study(ls_symbols, ldt_timestamps, s_study_name):
-    global dataObj
+def write_order(symbol, tstamp):
+    global f
+    global orders_csv
+
+    if f is None:
+        f = open('{0:s}/{1:s}'.format(os.path.dirname(os.path.realpath(__file__)), orders_csv), 'w')
+
+    f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, BUY, 100'.format(tstamp.year, tstamp.month, tstamp.day))
+    five_days_later = dt.timedelta(days=5)
+    close_tstamp = tstamp + five_days_later
+    f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, SELL, 100'
+            .format(close_tstamp.year, close_tstamp.month, close_tstamp.day))
+    pass
+
+
+def create_study(ls_symbols, ldt_timestamps, s_study_name, orders_csv):
+    global dataObj, f
 
     print "Grabbing data to perform {0}".format(s_study_name)
     ls_keys = ['close', 'actual_close']
@@ -56,11 +74,12 @@ def create_study(ls_symbols, ldt_timestamps, s_study_name):
         d_data[s_key] = d_data[s_key].fillna(1.0)
 
     df_events = find_events(ls_symbols, d_data)
+    f.close()
 
-    print "Creating Study"
-    ep.eventprofiler(df_events, d_data, i_lookback=20, i_lookforward=20,
-                     s_filename=s_study_name, b_market_neutral=True, b_errorbars=True,
-                     s_market_sym='SPY')
+    #print "Creating Study"
+    #ep.eventprofiler(df_events, d_data, i_lookback=20, i_lookforward=20,
+    #                 s_filename=s_study_name, b_market_neutral=True, b_errorbars=True,
+    #                 s_market_sym='SPY')
 
 
 def main():
@@ -73,11 +92,13 @@ def main():
     ls_symbols_2012 = dataObj.get_symbols_from_list('sp5002012')
     ls_symbols_2012.append('SPY')
 
-    ls_symbols_2008 = dataObj.get_symbols_from_list('sp5002008')
-    ls_symbols_2008.append('SPY')
-
-    #create_study(ls_symbols_2008, ldt_timestamps, '2008Study2.pdf')
     create_study(ls_symbols_2012, ldt_timestamps, '2012Study2.pdf')
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Generate trading events based on the $5 event')
+    parser.add_argument('orders_csv', help='(output) CSV file specifying dates of order execution')
+    args = parser.parse_args()
+
+    orders_csv = args.orders_csv
     main()
