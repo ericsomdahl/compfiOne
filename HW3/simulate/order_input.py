@@ -14,11 +14,6 @@ def markup_with_datetime_ordinal(na_in):
     return {'ordinal': dt_in.toordinal(), 'trade': na_in}
 
 
-def cleanup_csv_string(na_in):
-    #clean up input.  It may have mixed case or leading/trailing spaces
-    return na_in['symbol'][0].strip().upper()
-
-
 class OrdersInput(object):
     def __init__(self, csv_file):
         self.csv_file = csv_file
@@ -44,7 +39,7 @@ class OrdersInput(object):
         self.na_trade_dates.sort()
 
         #create an array of all of the symbols.  There will be repeats
-        self.na_symbols = np.apply_along_axis(cleanup_csv_string, 0, self.na_raw_orders)
+        self.na_symbols = self.na_raw_orders['symbol']
         #remove dupes
         self.na_symbols = np.unique(self.na_symbols)
 
