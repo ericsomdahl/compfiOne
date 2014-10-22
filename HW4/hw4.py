@@ -39,23 +39,22 @@ def find_events(ls_symbols, d_data):
             # Event is found if on 2 consecutive closes the price went from
             # greater than or equal to 5.00 to less than 5.00
             if f_symprice_yest >= 5.0 and f_symprice_today < 5.0:
-                write_order(s_sym, ldt_timestamps[i])
+                write_order(s_sym, ldt_timestamps[i], ldt_timestamps[i+5])
                 #df_events[s_sym].ix[ldt_timestamps[i]] = 1
 
     return df_events
 
 
-def write_order(symbol, tstamp):
+def write_order(symbol, open_tstamp, close_tstamp):
     global f
     global orders_csv
 
     if f is None:
         f = open('{0:s}/{1:s}'.format(os.path.dirname(os.path.realpath(__file__)), orders_csv), 'w')
 
-    f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, BUY, 100'.format(tstamp.year, tstamp.month, tstamp.day, symbol))
-    five_days_later = dt.timedelta(days=5)
-    close_tstamp = tstamp + five_days_later
-    f.write('{0:4d}, {1:02d}, {2:02d}, {3:s}, SELL, 100'
+    f.write('\n{0:4d}, {1:02d}, {2:02d}, {3:s}, BUY, 100'
+            .format(open_tstamp.year, open_tstamp.month, open_tstamp.day, symbol))
+    f.write('\n{0:4d}, {1:02d}, {2:02d}, {3:s}, SELL, 100'
             .format(close_tstamp.year, close_tstamp.month, close_tstamp.day, symbol))
     pass
 
