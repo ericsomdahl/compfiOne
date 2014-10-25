@@ -29,7 +29,7 @@ def find_events(ls_symbols, d_data):
 
     # Time stamps for the event range
     ldt_timestamps = df_close.index
-
+    last_possible_close_idx = len(ldt_timestamps) - 1
     for s_sym in ls_symbols:
         for i in range(1, len(ldt_timestamps)):
             # Calculating the returns for this timestamp
@@ -38,8 +38,9 @@ def find_events(ls_symbols, d_data):
 
             # Event is found if on 2 consecutive closes the price went from
             # greater than or equal to 5.00 to less than 5.00
-            if f_symprice_yest >= 5.0 and f_symprice_today < 5.0:
-                write_order(s_sym, ldt_timestamps[i], ldt_timestamps[i+5])
+            if f_symprice_yest >= 10.0 and f_symprice_today < 10.0:
+                close_idx = min((i+5), last_possible_close_idx)
+                write_order(s_sym, ldt_timestamps[i], ldt_timestamps[close_idx])
                 #df_events[s_sym].ix[ldt_timestamps[i]] = 1
 
     return df_events
