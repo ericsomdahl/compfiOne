@@ -33,4 +33,7 @@ The Analyzer takes the Sim output and compares it against a specified benchmark.
 ###HW4
 HW4 is derived from HW2.  It performs the same event study analysis as HW2 but instead of creating the event study, it outputs a CSV file of trades that can be fed into the HW3 Sim/Analyzer chain.
 
-
+###HW5
+HW5 is an implementation of Bollinger Bands.  Obviously there are smarter (http://www.ta-lib.org/) ways of using technical indicators.  But this is a nice exercise in using Pandas.
+The real neat idea in the module is the thought process around normalizing your indicator ouput -- by defining a standarized range of output for any and all
+indicators you use, machine learning techniques are more easily applied.
