@@ -16,11 +16,43 @@ d_data = None
 def main(in_args):
     load_data(in_args.ls_symbols)
     if in_args.indicator == 'bbands':
+        s_feature = 'Bollinger Bands'
         df_indicator = calc_bollinger_bands(in_args.ls_symbols)
     else:
+        s_feature = 'MACD'
         df_indicator = calc_macd(in_args.ls_symbols)
 
     output_result(df_indicator, in_args.ls_symbols)
+    plot_result(df_indicator, in_args.ls_symbols, s_feature)
+
+
+def plot_result(df_indicator, ls_symbols, s_feature):
+    import matplotlib.pyplot as plt
+    global ldf_data
+
+    for s_sym in ls_symbols:
+        ls_names = [s_sym]
+
+        plt.clf()
+        fig = plt.figure(1)
+        fig.add_subplot(211)
+        plt.plot(df_indicator[s_sym])
+        plt.legend(ls_names)
+        plt.ylabel(s_feature)
+        plt.xlabel('Trading Day')
+        fig.autofmt_xdate(rotation=45)
+
+        fig.add_subplot(212)
+        plt.plot(ldf_data[0][s_sym])
+        plt.legend(ls_names)
+        plt.ylabel('Adjusted Close')
+        plt.xlabel('Trading Day')
+        fig.autofmt_xdate(rotation=45)
+        s_output = '{0:s}-{1:s}.pdf'.format(s_sym, s_feature)
+        plt.savefig(s_output, format='pdf')
+        print 'Wrote {0:s}'.format(s_output)
+
+    pass
 
 
 def output_result(df_indicator, ls_symbols):
