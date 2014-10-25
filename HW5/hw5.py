@@ -1,8 +1,11 @@
 __author__ = 'eric'
 
+import pandas as pd
+import numpy as np
 import QSTK.qstkutil.DataAccess as da
 import QSTK.qstkutil.qsdateutil as du
 import datetime as dt
+import copy
 
 data_obj = None
 ldt_timestamps = None
@@ -12,15 +15,47 @@ d_data = None
 
 def main(in_args):
     load_data(in_args.ls_symbols)
-    calc_bollinger_bands() if in_args.indicator == 'bbands' else calc_macd()
-    pass
+    if in_args.indicator == 'bbands':
+        df_indicator = calc_bollinger_bands(in_args.ls_symbols)
+    else:
+        df_indicator = calc_macd(in_args.ls_symbols)
+
+    output_result(df_indicator, in_args.ls_symbols)
 
 
-def calc_bollinger_bands():
-    pass
+def output_result(df_indicator, ls_symbols):
+    header = '                     '
+    for s_symbol in ls_symbols:
+        header = header + '{:>9s}'.format(s_symbol)
+
+    print header
+    global ldt_timestamps
+    s_date_format = "%Y-%m-%d %H:%M:%S"
+
+    for i in xrange(0, len(ldt_timestamps)):
+        row = '{0:s}'.format(df_indicator.index[i].strftime(s_date_format))
+        for s_symbol in ls_symbols:
+            row = row + '  {0:>9.6f}'.format(df_indicator[s_symbol].ix[i])
+        print row
 
 
-def calc_macd():
+def calc_bollinger_bands(ls_symbols):
+    df_close = d_data['close']
+    print "Calculating Bollinger Bands"
+
+    df_bbands = copy.deepcopy(df_close)
+    df_bbands = df_bbands * np.NAN
+    look_back = 20
+
+    for s_sym in ls_symbols:
+        df_mean = pd.rolling_mean(df_close[s_sym], window=look_back, min_periods=look_back)
+        df_std = pd.rolling_std(df_close[s_sym], window=look_back, min_periods=look_back)
+        df_bbands[s_sym] = (df_close[s_sym] - df_mean) / df_std
+
+    return df_bbands
+
+
+def calc_macd(ls_symbols):
     pass
 
 
