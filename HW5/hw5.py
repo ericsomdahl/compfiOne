@@ -77,18 +77,34 @@ def calc_bollinger_bands(ls_symbols):
 
     df_bbands = copy.deepcopy(df_close)
     df_bbands = df_bbands * np.NAN
-    look_back = 20
+    i_look_back = 20
 
     for s_sym in ls_symbols:
-        df_mean = pd.rolling_mean(df_close[s_sym], window=look_back, min_periods=look_back)
-        df_std = pd.rolling_std(df_close[s_sym], window=look_back, min_periods=look_back)
+        df_mean = pd.rolling_mean(df_close[s_sym], window=i_look_back, min_periods=i_look_back)
+        df_std = pd.rolling_std(df_close[s_sym], window=i_look_back, min_periods=i_look_back)
         df_bbands[s_sym] = (df_close[s_sym] - df_mean) / df_std
 
     return df_bbands
 
 
 def calc_macd(ls_symbols):
-    pass
+    df_close = d_data['close']
+    print "Calculating MACD"
+
+    df_divergence = copy.deepcopy(df_close)
+    df_divergence = df_divergence * np.NAN
+    i_long_period = 26
+    i_short_period = 12
+    i_signal_period = 9
+
+    for s_sym in ls_symbols:
+        df_long_mean = pd.ewma(df_close[s_sym], min_periods=i_long_period, span=12.5)
+        df_short_mean = pd.ewma(df_close[s_sym], min_periods=i_short_period, span=5.5)
+        df_macd = df_short_mean - df_long_mean
+        df_signal = pd.ewma(df_macd, min_periods=i_signal_period, span=4)
+        df_divergence[s_sym] = df_macd - df_signal
+
+    return df_divergence
 
 
 def load_data(ls_symbols):
