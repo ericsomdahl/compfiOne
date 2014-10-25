@@ -24,9 +24,9 @@ def main(in_args):
 
 
 def output_result(df_indicator, ls_symbols):
-    header = '                     '
+    header = '                   '
     for s_symbol in ls_symbols:
-        header = header + '{:>9s}'.format(s_symbol)
+        header = header + '{:>11s}'.format(s_symbol)
 
     print header
     global ldt_timestamps
