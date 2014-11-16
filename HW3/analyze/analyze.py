@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def look_at(portfolio_input):
+def look_at(portfolio_input, s_study_pdf):
     i_trading_days = 252
 
     dt_start, dt_end = portfolio_input.get_start_end_dates()
@@ -31,13 +31,13 @@ def look_at(portfolio_input):
     fig = plt.figure()
     fig.add_subplot(111)
     plt.plot(portfolio_input.df_analysis_data['portfolio_values'])
-    plt.plot(portfolio_input.df_analysis_data['benchmark_values'], alpha=0.4)
+    plt.plot(portfolio_input.df_analysis_data['benchmark_values'], alpha=0.7)
     ls_names = ['Portfolio', portfolio_input.symbol]
     plt.legend(ls_names)
     plt.ylabel('Cumulative Returns')
     plt.xlabel('Trading Day')
     fig.autofmt_xdate(rotation=45)
-    plt.savefig('hw3.pdf', format='pdf')
+    plt.savefig(s_study_pdf, format='pdf')
 
     print "The final value of the portfolio using the sample file is -- {0:s}".format(portfolio_input.na_raw_input[0][-1])
     print "Details of the Performance of the portfolio :"
@@ -56,7 +56,7 @@ def main(input_args):
     import os
     values_csv = '{0:s}/{1:s}'.format(os.path.dirname(os.path.realpath(__file__)), input_args.values_csv)
     portfolio_input = PortfolioInput(values_csv, input_args.benchmark)
-    look_at(portfolio_input)
+    look_at(portfolio_input, input_args.study_pdf)
     pass
 
 
@@ -66,6 +66,7 @@ if __name__ == '__main__':
         description='Analyze a portfolios returns and compare it against a specified benchmark')
     parser.add_argument('values_csv', help='(input) CSV file specifying the daily value of the portfolio')
     parser.add_argument('benchmark', help='symbol of the benchmark to use in comparison')
+    parser.add_argument('study_pdf', help='(output) PDF of the study')
 
     args = parser.parse_args()
 
